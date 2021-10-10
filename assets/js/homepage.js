@@ -6,10 +6,17 @@ var repoSearchTerm = document.querySelector("#repo-search-term");
 var getUserRepos = function(user) { //make API call to get repo
     var apiUrl = "https://api.github.com/users/" + user + "/repos";
     fetch(apiUrl).then(function(response) {
-        response.json().then(function(data) {
-            displayRepos(data, user);
+            if (response.ok) {
+                response.json().then(function(data) {
+                    displayRepos(data, user);
+                });
+            } else {
+                alert("Error: GitHub User Not Found")
+            }
+        }) //no semi colon to chain onto line 8
+        .catch(function(error) {
+            alert("Error: Unable to Connect to GitHub")
         });
-    });
 };
 
 formSubmitHnadler = function(event) { //read form input
@@ -28,6 +35,12 @@ var displayRepos = function(repos, searchTerm) { //display repo on page
     //clear old content
     repoContainerEl.textContent = "";
     repoSearchTerm.textContent = searchTerm;
+
+    if (repos.length === 0) {
+        repoContainerEl.textContent = "No repositories found.";
+        return;
+    }
+
     for (var i = 0; i < repos.length; i++) {
         //format repo name
         var repoName = repos[i].owner.login + "/" + repos[i].name;
